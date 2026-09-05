@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>True or False — quiz</title>
+<meta name="description" content="Devine le vrai du faux ! 15 niveaux de faits pièges.">
+<meta name="theme-color" content="#070C1A">
+<link rel="icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg0:#070C1A;--bg1:#0C1730;--ink:#EAF0FF;--muted:#93A4C8;
+    --true:#35DE7C;--true-d:#22B863;--false:#FF5568;--false-d:#E23B4F;
+    --card:rgba(255,255,255,.05);--line:rgba(255,255,255,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:"Inter",system-ui,-apple-system,sans-serif;color:var(--ink);
+    min-height:100vh;min-height:100dvh;
+    background:radial-gradient(1000px 600px at 50% -10%, #16305F 0%, rgba(22,48,95,0) 60%),linear-gradient(180deg,var(--bg1),var(--bg0) 60%);
+    background-attachment:fixed;display:flex;justify-content:center;align-items:flex-start;
+    padding:max(18px,env(safe-area-inset-top)) 16px calc(22px + env(safe-area-inset-bottom));line-height:1.5}
+  .app{width:100%;max-width:460px;display:flex;flex-direction:column;min-height:100dvh}
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 2px 12px}
+  .brand{display:flex;align-items:center;gap:8px;font-family:"Fredoka",sans-serif;font-weight:600;text-decoration:none;color:inherit}
+  .brand img{width:28px;height:28px;border-radius:7px}
+  .brand b{color:var(--true)}
+  .hud{display:flex;align-items:center;gap:12px;font-family:"Fredoka",sans-serif;font-weight:600;font-size:.92rem}
+  .hearts{letter-spacing:2px;font-size:1rem}
+  .hearts .off{opacity:.25}
+  .lvl{color:var(--muted)}
+  .progress{height:6px;border-radius:99px;background:rgba(255,255,255,.09);overflow:hidden;margin-bottom:16px}
+  .progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--true),#7CF0AE);transition:width .3s}
+  .screen{flex:1;display:flex;flex-direction:column}
+  .hidden{display:none!important}
+  .center{align-items:center;justify-content:center;text-align:center}
+  .logo{width:116px;height:116px;border-radius:26px;box-shadow:0 20px 50px -18px rgba(0,0,0,.8),0 0 60px -18px rgba(70,130,255,.5);margin-bottom:20px}
+  h1{font-family:"Fredoka",sans-serif;font-weight:700;font-size:1.7rem;line-height:1.1}
+  .sub{color:var(--muted);margin-top:10px;max-width:26ch}
+  .qwrap{flex:1;display:flex;flex-direction:column;justify-content:center}
+  .qcard{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:26px 22px;text-align:center;box-shadow:0 20px 50px -24px rgba(0,0,0,.7)}
+  .qcard .q{font-family:"Fredoka",sans-serif;font-weight:600;font-size:1.3rem;line-height:1.32}
+  .verdict{margin-top:16px;font-weight:700;font-size:1.05rem;display:none}
+  .verdict.show{display:block}.verdict.ok{color:var(--true)}.verdict.no{color:var(--false)}
+  .explain{margin-top:9px;color:var(--muted);font-size:.94rem;display:none}
+  .explain.show{display:block}
+  .answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+  .ans{border:1px solid var(--line);border-radius:16px;padding:20px 10px;cursor:pointer;
+    background:rgba(255,255,255,.06);color:var(--ink);
+    font-family:"Fredoka",sans-serif;font-weight:600;font-size:1.15rem;
+    transition:transform .1s,background .15s,opacity .15s}
+  .ans:active{transform:translateY(1px)}
+  .ans.correct{background:linear-gradient(180deg,var(--true),var(--true-d));color:#04220F;border-color:transparent}
+  .ans.wrong{background:linear-gradient(180deg,var(--false),var(--false-d));color:#2a0007;border-color:transparent}
+  .ans.dim{opacity:.4}
+  .next{margin-top:16px;width:100%;padding:15px;border-radius:14px;cursor:pointer;background:rgba(255,255,255,.1);color:#fff;border:1px solid var(--line);font-family:"Fredoka",sans-serif;font-weight:600;font-size:1.05rem;display:none}
+  .next.show{display:block}
+  .btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:17px 18px;border-radius:16px;border:none;cursor:pointer;text-decoration:none;font-family:"Fredoka",sans-serif;font-weight:600;font-size:1.1rem;transition:transform .1s,filter .15s}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:linear-gradient(180deg,var(--true),var(--true-d));color:#04220F;box-shadow:0 14px 30px -12px rgba(53,222,124,.55)}
+  .btn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid var(--line)}
+  .btn-store{background:#fff;color:#0a0a0a}.btn-store svg{width:22px;height:22px;fill:#0a0a0a}
+  .score{font-family:"Fredoka",sans-serif;font-weight:700;font-size:3.2rem;line-height:1}
+  .score small{font-size:1.3rem;color:var(--muted);font-weight:600}
+  .rtitle{font-family:"Fredoka",sans-serif;font-weight:600;font-size:1.45rem;margin-top:10px}
+  .stack{width:100%;display:flex;flex-direction:column;gap:11px;margin-top:24px}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:rgba(20,22,30,.96);color:#fff;padding:12px 18px;border-radius:12px;font-size:.9rem;border:1px solid var(--line);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:50;max-width:88vw;text-align:center}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+  /* sticky store bar during gameplay */
+  .app{padding-bottom:78px}
+  .storebar{
+    position:fixed;left:0;right:0;bottom:0;z-index:40;
+    display:none;justify-content:center;
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,rgba(7,12,26,0),rgba(7,12,26,.92) 40%);
+  }
+  .storebar.show{display:flex}
+  .storebar a{
+    display:flex;align-items:center;justify-content:center;gap:9px;
+    width:100%;max-width:460px;padding:13px 16px;border-radius:14px;
+    background:#fff;color:#0a0a0a;text-decoration:none;
+    font-family:"Fredoka",sans-serif;font-weight:600;font-size:1rem;
+    box-shadow:0 -6px 24px -8px rgba(0,0,0,.6);
+  }
+  .storebar a svg{width:20px;height:20px;fill:#0a0a0a;flex:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="bar">
+    <a class="brand" href="index.html"><img src="icon.png" alt="" onerror="this.style.display='none'"><span>True or <b>False</b></span></a>
+    <div class="hud" id="hud">
+      <span class="lvl" id="lvl"></span>
+      <span class="hearts" id="hearts"></span>
+    </div>
+  </div>
+  <div class="progress"><i id="pbar"></i></div>
+
+  <section class="screen center" id="screen-start">
+    <img class="logo" src="icon.png" alt="True or False" onerror="this.style.display='none'">
+    <h1>Vrai ou faux ?</h1>
+    <p class="sub">15 niveaux de faits pièges. 3 vies. Jusqu'où iras-tu ?</p>
+    <div class="stack"><button class="btn btn-primary" id="startBtn">Jouer</button></div>
+  </section>
+
+  <section class="screen qwrap hidden" id="screen-quiz">
+    <div class="qcard">
+      <div class="q" id="statement"></div>
+      <div class="verdict" id="verdict"></div>
+      <div class="explain" id="explain"></div>
+    </div>
+    <div class="answers">
+      <button class="ans" id="btnTrue">VRAI</button>
+      <button class="ans" id="btnFalse">FAUX</button>
+    </div>
+    <button class="next" id="nextBtn">Suivant</button>
+  </section>
+
+  <section class="screen center hidden" id="screen-levelup">
+    <div class="score" style="font-size:2.4rem">Niveau <span id="luNum"></span> terminé !</div>
+    <div class="rtitle" id="luInfo"></div>
+    <div class="stack"><button class="btn btn-primary" id="contBtn">Niveau suivant →</button></div>
+  </section>
+
+  <section class="screen center hidden" id="screen-over">
+    <div class="score"><span id="scoreNum">0</span></div>
+    <div class="rtitle" id="rtitle"></div>
+    <div class="sub" id="rsub"></div>
+    <div class="stack">
+      <button class="btn btn-primary" id="againBtn">Rejouer</button>
+      <button class="btn btn-ghost" id="shareBtn">Partager le résultat</button>
+      <a class="btn btn-store" id="storeBtn" href="https://apps.apple.com/ua/app/true-or-false-fact-challenge/id6801155731?l=fr" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.05 12.04c-.03-2.6 2.13-3.85 2.22-3.91-1.21-1.77-3.1-2.02-3.77-2.04-1.6-.16-3.13.94-3.94.94-.81 0-2.07-.92-3.4-.9-1.75.03-3.36 1.02-4.26 2.58-1.82 3.16-.47 7.84 1.3 10.41.86 1.26 1.89 2.67 3.24 2.62 1.3-.05 1.79-.84 3.36-.84 1.57 0 2.01.84 3.38.81 1.4-.02 2.28-1.28 3.13-2.55.99-1.46 1.4-2.87 1.42-2.94-.03-.01-2.72-1.04-2.75-4.13zM14.6 4.42c.72-.87 1.2-2.08 1.07-3.29-1.03.04-2.28.69-3.02 1.56-.66.77-1.24 2-1.09 3.18 1.15.09 2.32-.58 3.04-1.45z"/></svg>
+        Version complète sur l'App Store
+      </a>
+    </div>
+  </section>
+
+  <div class="storebar" id="storebar">
+    <a href="https://apps.apple.com/ua/app/true-or-false-fact-challenge/id6801155731?l=fr" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.05 12.04c-.03-2.6 2.13-3.85 2.22-3.91-1.21-1.77-3.1-2.02-3.77-2.04-1.6-.16-3.13.94-3.94.94-.81 0-2.07-.92-3.4-.9-1.75.03-3.36 1.02-4.26 2.58-1.82 3.16-.47 7.84 1.3 10.41.86 1.26 1.89 2.67 3.24 2.62 1.3-.05 1.79-.84 3.36-.84 1.57 0 2.01.84 3.38.81 1.4-.02 2.28-1.28 3.13-2.55.99-1.46 1.4-2.87 1.42-2.94-.03-.01-2.72-1.04-2.75-4.13zM14.6 4.42c.72-.87 1.2-2.08 1.07-3.29-1.03.04-2.28.69-3.02 1.56-.66.77-1.24 2-1.09 3.18 1.15.09 2.32-.58 3.04-1.45z"/></svg>
+      Version complète sur l'App Store
+    </a>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const EMBEDDED = [
+ {s:"Le noyau interne de la Terre est principalement constitué d'eau liquide.",r:false,e:"Le noyau interne est solide, composé surtout de fer et de nickel."},
+ {s:"Toutes les planètes du système solaire tournent sur elles-mêmes dans le même sens.",r:false,e:"Vénus et Uranus tournent dans un sens différent des autres."},
+ {s:"Vénus compte plus de volcans que toute autre planète du système solaire.",r:true,e:"Vénus possède des milliers de formations volcaniques, plus que toute autre planète connue."},
+ {s:"La grotte la plus profonde connue sur Terre dépasse 10 kilomètres de profondeur.",r:false,e:"Les plus profondes font un peu plus de 2 km, pas plus de 10."},
+ {s:"L'axolotl peut régénérer des parties de son cerveau et de sa moelle épinière.",r:true,e:"Il possède une capacité unique à régénérer du tissu nerveux."},
+ {s:"La fluorite peut briller sous une lumière ultraviolette.",r:true,e:"Certains échantillons sont fortement fluorescents sous UV."},
+ {s:"Le jeune sphénodon possède un troisième œil sensible à la lumière.",r:true,e:"Cet œil pariétal se recouvre d'écailles avec le temps."},
+ {s:"Certaines orchidées peuvent vivre sans terre, en poussant sur d'autres plantes.",r:true,e:"Beaucoup d'orchidées sont épiphytes et poussent sur les arbres."},
+ {s:"Certaines bactéries supportent des niveaux de radiation mortels pour l'homme.",r:true,e:"Deinococcus radiodurans est célèbre pour sa résistance aux radiations."},
+ {s:"L'ancienne cité de Pétra a été taillée directement dans la roche.",r:true,e:"Pétra, en Jordanie, est célèbre pour ses monuments sculptés dans le grès."},
+ {s:"Certains requins peuvent se reproduire sans mâle, par parthénogenèse.",r:true,e:"Chez plusieurs espèces, des naissances sans accouplement ont été observées."},
+ {s:"La planète Neptune a été prédite mathématiquement avant d'être observée au télescope.",r:true,e:"Calculée d'après les écarts de l'orbite d'Uranus."},
+ {s:"Le béton romain de certains ouvrages anciens devient plus solide avec le temps.",r:true,e:"Certains bétons romains se réparent d'eux-mêmes grâce à l'eau."},
+ {s:"L'ancienne bibliothèque d'Alexandrie se trouvait en Australie.",r:false,e:"Elle se trouvait en Égypte."},
+ {s:"Certaines étoiles de mer peuvent se reproduire en divisant leur corps.",r:true,e:"Un bras avec une partie du disque central peut régénérer un corps entier."},
+ {s:"Tous les Grands Lacs se situent entièrement au Canada.",r:false,e:"La plupart sont à la frontière du Canada et des États-Unis."},
+ {s:"On appelle les naines brunes ainsi parce que ce sont des planètes ratées.",r:false,e:"Ce sont des objets substellaires, mais pas des planètes."},
+ {s:"Tous les satellites connus du système solaire ont une forme parfaitement sphérique.",r:false,e:"Beaucoup de petits satellites sont irréguliers, leur gravité étant trop faible."},
+ {s:"Le bec-en-sabot peut produire avec son bec un bruit rappelant une mitrailleuse.",r:true,e:"Il claque bruyamment du bec, comme une mitrailleuse."},
+ {s:"La planète Uranus a été découverte avant l'invention des télescopes.",r:false,e:"Reconnue comme planète grâce au télescope en 1781."},
+ {s:"L'ancienne cité de Memphis était la capitale de l'empire aztèque.",r:false,e:"Memphis était égyptienne ; la capitale aztèque était Tenochtitlan."},
+ {s:"La face cachée de la Lune est toujours plongée dans l'obscurité totale.",r:false,e:"Elle est éclairée par le Soleil, simplement invisible depuis la Terre."},
+ {s:"La mer Caspienne est techniquement considérée comme le plus grand lac du monde.",r:true,e:"Malgré son nom, c'est un plan d'eau intérieur souvent classé comme lac."},
+ {s:"L'ancien royaume hittite se trouvait sur le territoire de l'Australie actuelle.",r:false,e:"Les Hittites vivaient en Anatolie, sur le territoire de la Turquie actuelle."},
+ {s:"Il existe en Nouvelle-Zélande des perroquets incapables de voler.",r:true,e:"Le kakapo est un perroquet nocturne qui ne vole pas."},
+ {s:"Le Sahara a toujours été aussi aride qu'aujourd'hui.",r:false,e:"Le Sahara a connu des périodes vertes et humides."},
+ {s:"Le bismuth est, à l'état naturel, plus radioactif que l'uranium.",r:false,e:"Le bismuth n'est que très faiblement radioactif."},
+ {s:"Pluton est plus grand que la Lune.",r:false,e:"Pluton est plus petit que la Lune."},
+ {s:"Le manuscrit de Voynich est entièrement déchiffré et compris des chercheurs.",r:false,e:"Il reste indéchiffré malgré de nombreuses tentatives."},
+ {s:"La ceinture principale d'astéroïdes se situe entre Mars et Jupiter.",r:true,e:"La plupart des astéroïdes gravitent entre ces deux orbites."},
+ {s:"Vénus n'a aucune pression atmosphérique car elle n'a pas d'atmosphère.",r:false,e:"Vénus a une atmosphère très dense et une pression bien supérieure à la Terre."},
+ {s:"Le pôle nord magnétique de la Terre est toujours resté au même endroit.",r:false,e:"Il se déplace constamment à cause du noyau terrestre."},
+ {s:"L'élément gallium peut fondre dans la paume de la main.",r:true,e:"Le gallium fond vers 29,8 °C, proche de la température du corps."},
+ {s:"Autour de certaines sources hydrothermales profondes, la vie existe sans lumière du Soleil.",r:true,e:"Ces écosystèmes reposent sur des micro-organismes chimiosynthétiques."},
+ {s:"Io est le corps le plus actif volcaniquement du système solaire.",r:true,e:"Ce satellite de Jupiter possède des centaines de volcans actifs."},
+ {s:"Aucun engin spatial n'a jamais quitté la zone des planètes du système solaire.",r:false,e:"Voyager 1 et 2 ont déjà dépassé la zone des planètes."},
+ {s:"Le protée est une salamandre des cavernes capable de vivre plusieurs décennies.",r:true,e:"Un amphibien longévif adapté à l'obscurité des grottes."},
+ {s:"Une mole de n'importe quelle substance pèse toujours exactement un gramme.",r:false,e:"Sa masse dépend de la masse molaire de la substance."},
+ {s:"Certains tardigrades peuvent survivre dans le vide de l'espace.",r:true,e:"Ils supportent un temps le vide et les radiations."},
+ {s:"La crevette-mante peut posséder jusqu'à seize types de récepteurs de couleur.",r:true,e:"Elle a une vision extrêmement complexe."},
+ {s:"Tous les métaux sont magnétiques à température ambiante.",r:false,e:"Seuls certains, comme le fer, le cobalt et le nickel, le sont fortement."},
+ {s:"Le crocodile du Nil vit en Antarctique.",r:false,e:"Il vit en Afrique, pas en Antarctique."},
+ {s:"La planète naine Hauméa possède un anneau.",r:true,e:"L'un des rares petits corps du système solaire à en avoir un."},
+ {s:"Le premier ordinateur numérique programmable a été construit dans la Rome antique.",r:false,e:"Ils n'existent qu'à l'époque moderne."},
+ {s:"La tour de Pise a été bâtie parfaitement droite et ne penche que depuis peu.",r:false,e:"Elle penche depuis sa construction, à cause d'un sol instable."},
+ {s:"Certaines routes de la Rome antique ont subsisté jusqu'à nos jours.",r:true,e:"Des voies romaines pavées existent encore."},
+ {s:"La couche d'ozone absorbe une grande partie des rayons ultraviolets du Soleil.",r:true,e:"L'ozone stratosphérique protège la Terre des UV nocifs."},
+ {s:"Certaines éponges de verre peuvent vivre des milliers d'années.",r:true,e:"Certaines comptent parmi les animaux les plus longévifs."},
+ {s:"L'appendice humain est totalement inutile en toutes circonstances.",r:false,e:"Il pourrait aider la flore intestinale et l'immunité."},
+ {s:"Mercure possède une atmosphère dense semblable à celle de la Terre.",r:false,e:"Mercure n'a qu'une exosphère très ténue."},
+ {s:"La rétine de l'œil humain perçoit directement les vibrations sonores.",r:false,e:"La rétine perçoit la lumière ; le son est traité par les oreilles."},
+ {s:"Certains champignons comptent parmi les plus grands organismes vivants de la Terre.",r:true,e:"D'immenses réseaux de mycélium couvrent de très grandes surfaces."},
+ {s:"La plus ancienne écriture connue est apparue après l'invention d'Internet.",r:false,e:"L'écriture est née des milliers d'années avant Internet."},
+ {s:"La Grande Tache rouge de Jupiter est une énorme montagne solide.",r:false,e:"C'est une gigantesque tempête atmosphérique durable."},
+ {s:"Certains lichens survivent à des conditions extrêmes proches de celles de l'espace.",r:true,e:"Ils supportent vide, radiations et températures extrêmes."},
+ {s:"Un quasar peut briller plus qu'une galaxie entière.",r:true,e:"Alimentés par des trous noirs supermassifs, ils sont extrêmement lumineux."},
+ {s:"L'intestin grêle humain est plus court que le pouce de la main.",r:false,e:"L'intestin grêle mesure plusieurs mètres."},
+ {s:"L'ancienne cité de Pompéi a été détruite par l'éruption du mont Fuji.",r:false,e:"Pompéi a été ensevelie par le Vésuve en 79 apr. J.-C."},
+ {s:"Le basket-ball moderne faisait partie des Jeux olympiques antiques.",r:false,e:"Le basket a été inventé à la fin du XIXe siècle."},
+ {s:"Certaines planètes hors du système solaire gravitent autour de deux étoiles.",r:true,e:"On a découvert des planètes autour de systèmes binaires."},
+ {s:"Certaines espèces de bambou ne fleurissent qu'une fois en plusieurs décennies.",r:true,e:"Elles fleurissent après un très long cycle, puis peuvent mourir."},
+ {s:"La mer Morte se situe sous le niveau des océans.",r:true,e:"Ses rives comptent parmi les points les plus bas des terres émergées."},
+ {s:"Le photon possède une charge électrique.",r:false,e:"Les photons sont électriquement neutres."},
+ {s:"Le plus grand volcan connu du système solaire se trouve sur Terre.",r:false,e:"Olympus Mons, sur Mars, est le plus grand connu."},
+ {s:"Certains poissons des abysses peuvent produire leur propre lumière rouge.",r:true,e:"Certains poissons-dragons émettent une bioluminescence rouge."},
+ {s:"L'horizon des événements d'un trou noir est une surface physique solide.",r:false,e:"C'est une limite d'où la lumière ne peut plus s'échapper, pas une surface."},
+ {s:"L'ancien empire assyrien se trouvait en Amérique du Sud.",r:false,e:"L'Assyrie se situait en Mésopotamie, surtout en Irak actuel."},
+ {s:"Certaines guêpes transforment des cafards en hôtes qu'elles dirigent pour leurs larves.",r:true,e:"La guêpe bijou pique le cafard pour modifier son comportement."},
+ {s:"Le système de numération de la Rome antique possédait un symbole standard pour le zéro.",r:false,e:"Les chiffres romains n'avaient pas de symbole pour le zéro."},
+ {s:"La crevette pistolet peut créer une bulle assez chaude pour produire un éclair de lumière.",r:true,e:"Le claquement de sa pince crée une bulle de cavitation qui émet de la lumière."},
+ {s:"L'organe qui pompe le sang dans le corps est la rate.",r:false,e:"C'est le cœur ; la rate filtre le sang et aide l'immunité."},
+ {s:"L'ancienne cité de Machu Picchu a été bâtie par la civilisation inca.",r:true,e:"Célèbre cité inca des Andes."},
+ {s:"Tous les astéroïdes sont plus grands que les planètes.",r:false,e:"Les astéroïdes sont bien plus petits que les planètes."},
+ {s:"Vénus possède un satellite nommé Triton.",r:false,e:"Vénus n'a aucun satellite ; Triton appartient à Neptune."},
+ {s:"Le kakapo est un perroquet nocturne incapable de voler.",r:true,e:"Un perroquet terrestre et nocturne de Nouvelle-Zélande."},
+ {s:"La Terre est le seul corps du système solaire à posséder des volcans.",r:false,e:"Mars, Io et Vénus présentent aussi du volcanisme."},
+ {s:"La fosse des Mariannes se trouve dans l'océan Atlantique.",r:false,e:"Elle se situe dans l'ouest du Pacifique."},
+ {s:"Les globules rouges humains conservent un noyau toute leur vie.",r:false,e:"Les globules rouges matures n'ont pas de noyau."},
+ {s:"Le requin du Groenland peut vivre plusieurs siècles.",r:true,e:"L'un des vertébrés les plus longévifs connus."},
+ {s:"À la surface de Mars, la gravité est plus forte que sur Terre.",r:false,e:"Elle y est nettement plus faible que sur Terre."},
+ {s:"La galaxie d'Andromède se rapproche de la Voie lactée.",r:true,e:"Dans des milliards d'années, elles entreront en collision."},
+ {s:"L'ancienne route de la Soie était une seule route pavée continue de la Chine à Rome.",r:false,e:"C'était un réseau de pistes commerciales, pas une route unique."},
+ {s:"Certains céphalopodes peuvent modifier activement leur ARN.",r:true,e:"Calmars et pieuvres ont un niveau d'édition de l'ARN exceptionnel."},
+ {s:"Les anciens Mayas utilisaient un système de numération incluant le zéro.",r:true,e:"Ils ont développé de façon autonome la notion du zéro."},
+ {s:"Neptune est plus proche du Soleil qu'Uranus.",r:false,e:"Neptune est plus éloignée du Soleil qu'Uranus."},
+ {s:"Dans le désert d'Atacama, il existe des endroits sans pluie enregistrée depuis des décennies.",r:true,e:"Certaines zones comptent parmi les lieux les plus arides de la Terre."},
+ {s:"Mercure possède un satellite plus grand que la Lune.",r:false,e:"Mercure n'a aucun satellite naturel."},
+ {s:"La vitesse de la lumière dépend de si elle traverse du verre ou le vide.",r:true,e:"Dans le verre, la lumière est plus lente que dans le vide."},
+ {s:"Certaines étoiles finissent leur vie en devenant des naines blanches.",r:true,e:"Après avoir épuisé leur combustible, comme le Soleil un jour."},
+ {s:"Tous les éléments radioactifs brillent visiblement dans le noir.",r:false,e:"La radioactivité ne provoque pas toujours de lueur visible."},
+ {s:"Tous les volcans de la Terre n'entrent en éruption qu'une seule fois, puis disparaissent.",r:false,e:"Beaucoup entrent en éruption plusieurs fois."},
+ {s:"Le cœur humain se compose de trois cavités.",r:false,e:"Un cœur humain normal en possède quatre."},
+ {s:"La planète naine Cérès contient d'importantes réserves de glace d'eau.",r:true,e:"Cérès renferme une quantité notable de glace d'eau."},
+ {s:"Le désert du Sahara est plus grand que le continent antarctique.",r:false,e:"L'Antarctique est nettement plus grand que le Sahara."},
+ {s:"Dans l'ancienne cité de Çatal Höyük, on entrait dans beaucoup de maisons par le toit.",r:true,e:"Les maisons étaient si serrées qu'on y accédait par le toit."},
+ {s:"Le tungstène possède l'un des points de fusion les plus élevés de tous les éléments.",r:true,e:"Il fond à plus de 3400 °C."},
+ {s:"Le lac Baïkal contient plus d'eau douce que tous les Grands Lacs réunis.",r:true,e:"Environ un cinquième de l'eau douce de surface non gelée du monde."},
+ {s:"Le plus grand satellite du système solaire est plus grand que la planète Mercure.",r:true,e:"Ganymède, satellite de Jupiter, dépasse Mercure."},
+ {s:"Certaines chauves-souris utilisent l'écholocation à des fréquences inaudibles pour l'homme.",r:true,e:"Elles émettent des ultrasons hors de portée humaine."},
+ {s:"L'ancienne cité de Teotihuacan a été construite par les Vikings.",r:false,e:"Bâtie par une civilisation de Mésoamérique, pas par les Vikings."},
+ {s:"L'ancienne Sparte se trouvait en Égypte.",r:false,e:"Sparte était une cité de la Grèce antique."},
+ {s:"Une étoile à neutrons peut tourner des centaines de fois par seconde.",r:true,e:"Certains pulsars tournent des centaines de fois par seconde."},
+ {s:"Le point le plus profond de l'océan est plus profond que la hauteur de l'Everest.",r:true,e:"La fosse Challenger fait ~11 km, l'Everest ~8,8 km."},
+ {s:"Certains champignons peuvent décomposer des matériaux proches du plastique.",r:true,e:"Sous certaines conditions, ils dégradent certains plastiques."},
+ {s:"Un seul éclair peut transformer le sable en tubes de verre.",r:true,e:"Ainsi se forment les fulgurites."},
+ {s:"La mer des Sargasses est définie par des courants océaniques et non par des côtes.",r:true,e:"La seule mer délimitée par des courants plutôt que par des terres."},
+ {s:"Certaines étoiles deviennent des géantes rouges en vieillissant.",r:true,e:"En fin de vie, de nombreuses étoiles gonflent en géantes rouges."},
+ {s:"Certaines météorites trouvées sur Terre proviennent de Mars.",r:true,e:"Leur composition confirme une éjection depuis Mars lors d'impacts."}
+];
+let FACTS = EMBEDDED.map(x=>({statement:x.s,isReal:x.r,explanation:x.e}));
+(async()=>{try{const r=await fetch('questions.json',{cache:'no-store'});if(r.ok){const d=await r.json();const a=Array.isArray(d)?d:(d.questions||d.statements||null);if(a&&a.length){FACTS=a.filter(o=>o&&o.statement&&typeof o.isReal!=='undefined').map(o=>({statement:o.statement,isReal:!!o.isReal,explanation:o.explanation||""}));}}}catch(e){}})();
+
+const LEVELS=15, PER=7, LIVES=3;
+const $=id=>document.getElementById(id);
+let pool=[],ptr=0,level=1,qi=0,hearts=LIVES,score=0,answered=false;
+
+function show(n){['start','quiz','levelup','over'].forEach(s=>$('screen-'+s).classList.toggle('hidden',s!==n));$('storebar').classList.toggle('show', n==='quiz'||n==='levelup');}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function drawQ(){ if(ptr>=pool.length){pool=shuffle([...FACTS]);ptr=0;} return pool[ptr++]; }
+let cur=null;
+
+function hud(){
+  $('lvl').textContent='Niveau '+level+'/'+LEVELS;
+  let h='';for(let i=0;i<LIVES;i++)h+= i<hearts?'❤️':'<span class="off">🤍</span>';
+  $('hearts').innerHTML=h;
+  $('pbar').style.width=((qi)/PER*100)+'%';
+}
+function start(){ pool=shuffle([...FACTS]);ptr=0;level=1;qi=0;hearts=LIVES;score=0;show('quiz');nextQ(); }
+function nextQ(){
+  answered=false;cur=drawQ();
+  $('statement').textContent=cur.statement;
+  $('verdict').className='verdict';$('explain').className='explain';
+  ['btnTrue','btnFalse'].forEach(id=>{const b=$(id);b.className='ans';b.disabled=false;});
+  $('nextBtn').className='next';
+  hud();
+}
+function answer(val){
+  if(answered)return;answered=true;
+  const right=(val===cur.isReal);
+  const tb=$('btnTrue'),fb=$('btnFalse');
+  tb.disabled=true;fb.disabled=true;
+  const correctBtn=cur.isReal?tb:fb, chosen=val?tb:fb;
+  correctBtn.classList.add('correct');
+  if(!right){chosen.classList.add('wrong');} else {(val?fb:tb).classList.add('dim');}
+  if(right){score++;} else {hearts--;}
+  const v=$('verdict');v.classList.add('show',right?'ok':'no');v.textContent=right?'✓ Correct !':'✗ Faux';
+  if(cur.explanation){$('explain').classList.add('show');$('explain').textContent=cur.explanation;}
+  qi++;hud();
+  const nb=$('nextBtn');nb.classList.add('show');
+  if(hearts<=0){nb.textContent='Résultat';}
+  else if(qi>=PER){nb.textContent=(level>=LEVELS)?'Finale 🏆':'Niveau terminé →';}
+  else{nb.textContent='Suivant';}
+}
+function next(){
+  if(hearts<=0){return gameOver(false);}
+  if(qi>=PER){
+    if(level>=LEVELS){return gameOver(true);}
+    show('levelup');$('luNum').textContent=level;$('luInfo').textContent='Bonnes réponses : '+score+' • Vies : '+hearts;
+    return;
+  }
+  nextQ();
+}
+function cont(){ level++;qi=0;show('quiz');nextQ(); }
+function gameOver(win){
+  show('over');$('lvl').textContent='';$('hearts').textContent='';$('pbar').style.width='100%';
+  $('scoreNum').textContent=score;
+  if(win){$('rtitle').textContent='Les 15 niveaux terminés ! 🏆';$('rsub').textContent="Tu repères les faux au premier coup d'œil. Bonnes réponses : "+score+".";}
+  else{$('rtitle').textContent='Partie terminée';$('rsub').textContent='Tu es arrivé au niveau '+level+' sur '+LEVELS+'. Bonnes réponses : '+score+'. On rejoue ?';}
+}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2600);}
+function share(){
+  const txt="J'ai atteint le niveau "+level+"/"+LEVELS+" au quiz « True or False » ("+score+" bonnes réponses) ! Tu fais mieux ? 🎮";
+  const url=location.href.split('#')[0].replace(/jeu\.html.*/,'')+'jeu.html';
+  if(navigator.share){navigator.share({title:'True or False',text:txt,url}).catch(()=>{});}
+  else if(navigator.clipboard){navigator.clipboard.writeText(txt+' '+url).then(()=>toast('Copié — colle-le en story/chat')).catch(()=>toast(txt));}
+  else toast(txt);
+}
+$('startBtn').onclick=start;$('againBtn').onclick=start;$('contBtn').onclick=cont;
+$('nextBtn').onclick=next;$('shareBtn').onclick=share;
+$('btnTrue').onclick=()=>answer(true);$('btnFalse').onclick=()=>answer(false);
+show('start');
+</script>
+</body>
+</html>
